@@ -4,23 +4,13 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 func GetCalibrationValues(str string) int {
-	pattern := `one|two|three|four|five|six|seven|eight|nine`
-
-	words := strings.Split(pattern, "|")
-
-	reversedWords := make([]string, len(words))
-	for i, word := range words {
-		reversedWords[i] = reverseString(word)
-	}
+	forwardPattern := `one|two|three|four|five|six|seven|eight|nine|[1-9]`
+	backwardPattern := `enin|thgie|neves|xis|evif|ruof|eerht|owt|eno|[1-9]`
 
 	reversedStr := reverseString(str)
-
-	forwardPattern := strings.Join(words, "|") + "|[1-9]"
-	backwardPattern := strings.Join(reversedWords, "|") + "|[1-9]"
 
 	forwardRegex := regexp.MustCompile(forwardPattern)
 	backwardRegex := regexp.MustCompile(backwardPattern)
