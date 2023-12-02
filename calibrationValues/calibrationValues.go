@@ -2,23 +2,60 @@ package calibrationvalues
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
-	"unicode"
+	"strings"
 )
 
 func GetCalibrationValues(str string) int {
-	firstNum := ""
-	lastNum := ""
-	for _, char := range str {
-		if unicode.IsDigit(char) {
-			num := string(char)
-			if firstNum == "" {
-				firstNum = num
-				lastNum = num
-			} else {
-				lastNum = num
-			}
-		}
+	pattern := `one|two|three|four|five|six|seven|eight|nine`
+
+	words := strings.Split(pattern, "|")
+
+	reversedWords := make([]string, len(words))
+	for i, word := range words {
+		reversedWords[i] = reverseString(word)
+	}
+
+	reversedStr := reverseString(str)
+
+	forwardPattern := strings.Join(words, "|") + "|[1-9]"
+	backwardPattern := strings.Join(reversedWords, "|") + "|[1-9]"
+
+	forwardRegex := regexp.MustCompile(forwardPattern)
+	backwardRegex := regexp.MustCompile(backwardPattern)
+
+	matches := forwardRegex.FindAllStringSubmatch(str, -1)
+	backwardMatches := backwardRegex.FindAllStringSubmatch(reversedStr, -1)
+
+	if reverseString(backwardMatches[0][0]) != matches[len(matches)-1][0] {
+		matches = append(matches, []string{reverseString(backwardMatches[0][0])})
+	}
+
+	if len(matches) == 0 {
+		return 0
+	}
+
+	firstNum := matches[0][0]
+	lastNum := matches[len(matches)-1][0]
+	numReference := map[string]string{
+		"one":   "1",
+		"two":   "2",
+		"three": "3",
+		"four":  "4",
+		"five":  "5",
+		"six":   "6",
+		"seven": "7",
+		"eight": "8",
+		"nine":  "9",
+	}
+
+	if _, ok := numReference[firstNum]; ok {
+		firstNum = numReference[firstNum]
+	}
+
+	if _, ok := numReference[lastNum]; ok {
+		lastNum = numReference[lastNum]
 	}
 
 	concattedNums := firstNum + lastNum
@@ -30,4 +67,12 @@ func GetCalibrationValues(str string) int {
 	}
 
 	return combinedInt
+}
+
+func reverseString(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
+	}
+	return string(runes)
 }
